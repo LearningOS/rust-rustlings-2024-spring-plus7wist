@@ -9,7 +9,10 @@
 // Execute `rustlings hint try_from_into` or use the `hint` watch subcommand for
 // a hint.
 
-use std::convert::{TryFrom, TryInto};
+use std::{
+    convert::{TryFrom, TryInto},
+    num::TryFromIntError,
+};
 
 #[derive(Debug, PartialEq)]
 struct Color {
@@ -27,8 +30,6 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
-
 // Your task is to complete this implementation and return an Ok result of inner
 // type Color. You need to create an implementation for a tuple of three
 // integers, an array of three integers, and a slice of integers.
@@ -37,10 +38,22 @@ enum IntoColorError {
 // time, but the slice implementation needs to check the slice length! Also note
 // that correct RGB color values must be integers in the 0..=255 range.
 
+impl From<TryFromIntError> for IntoColorError {
+    fn from(_: TryFromIntError) -> Self {
+        IntoColorError::IntConversion
+    }
+}
+
 // Tuple implementation
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
-    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+
+    fn try_from((red, green, blue): (i16, i16, i16)) -> Result<Self, Self::Error> {
+        Ok(Color {
+            red: red.try_into()?,
+            green: green.try_into()?,
+            blue: blue.try_into()?,
+        })
     }
 }
 
@@ -48,6 +61,11 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        Ok(Color {
+            red: arr[0].try_into()?,
+            green: arr[1].try_into()?,
+            blue: arr[2].try_into()?,
+        })
     }
 }
 
@@ -55,6 +73,15 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        }
+
+        Ok(Color {
+            red: slice[0].try_into()?,
+            green: slice[1].try_into()?,
+            blue: slice[2].try_into()?,
+        })
     }
 }
 
