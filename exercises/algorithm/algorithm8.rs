@@ -3,8 +3,6 @@
     This question requires you to use queues to implement the functionality of the stack
 */
 
-// I AM NOT DONE
-
 #[derive(Debug)]
 pub struct Queue<T> {
     elements: Vec<T>,
@@ -55,14 +53,12 @@ impl<T> Default for Queue<T> {
 
 pub struct Stack<T> {
     q1: Queue<T>,
-    q2: Queue<T>,
 }
 
 impl<T> Stack<T> {
     pub fn new() -> Self {
         Self {
             q1: Queue::<T>::new(),
-            q2: Queue::<T>::new(),
         }
     }
 
@@ -72,27 +68,20 @@ impl<T> Stack<T> {
 
     pub fn pop(&mut self) -> Result<T, &str> {
         Ok(if self.q1.is_empty() {
-            match self.q2.dequeue() {
-                Ok(ok) => ok,
-                Err(_) => return Err("Stack is empty"),
-            }
+            return Err("Stack is empty");
         } else {
-            let mut tmp = vec![];
+            let mut n = self.q1.size();
 
-            while let Ok(top) = self.q1.dequeue() {
-                tmp.push(top);
+            for i in 0..(n - 1) {
+                let x = self.q1.dequeue().unwrap();
+                self.q1.enqueue(x);
             }
-
-            for each in tmp.into_iter().rev() {
-                self.q2.enqueue(each);
-            }
-
-            self.q2.dequeue().unwrap()
+            self.q1.dequeue().unwrap()
         })
     }
 
     pub fn is_empty(&self) -> bool {
-        self.q1.is_empty() && self.q2.is_empty()
+        self.q1.is_empty()
     }
 }
 
